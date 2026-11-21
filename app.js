@@ -1,0 +1,24 @@
+const view=document.getElementById('view');
+const nav=[...document.querySelectorAll('.tab')];
+const pages={
+dashboard:()=>`<div class="eyebrow">Artist workspace</div><h1 class="heading">Good evening.</h1><p class="sub">Your music career, in one place.</p>
+<div class="section-head"><h2>Overview</h2><button class="link" data-go="analytics">VIEW ANALYTICS ↗</button></div>
+<div class="grid">
+<div class="card"><div class="metric">—</div><div class="metric-label">Monthly listeners</div><div class="metric-note">Connect Spotify to view</div></div>
+<div class="card"><div class="metric">—</div><div class="metric-label">Audience growth</div><div class="metric-note">Connect platforms to view</div></div>
+<div class="card"><div class="metric">0</div><div class="metric-label">Active projects</div></div>
+<div class="card"><div class="metric">0</div><div class="metric-label">Open tasks</div></div></div>
+<div class="section-head"><h2>Quick actions</h2></div><div class="quick">
+<button data-add="Track"><b>＋</b>Track</button><button data-add="Project"><b>＋</b>Project</button><button data-add="Campaign"><b>＋</b>Campaign</button><button data-add="Task"><b>＋</b>Task</button></div>
+<div class="section-head"><h2>Coming up</h2><button class="link" data-go="calendar">CALENDAR ↗</button></div><div class="card"><div class="empty">Your upcoming releases, deadlines and shows will appear here.</div></div>
+<div class="section-head"><h2>Focus</h2></div><div class="card"><div class="item"><div class="item-icon">!</div><div><div class="item-title">Connect your artist platforms</div><div class="item-sub">Add your official profile links in Settings.</div></div><span class="pill">SETUP</span></div><div class="item"><div class="item-icon">✓</div><div><div class="item-title">Create your first project</div><div class="item-sub">Start organizing tracks and releases.</div></div></div></div>`,
+music:()=>section('Music Library','All your tracks, lyrics, recordings and credits.',['Tracks','Beats Library','Samples Studio','Collaborations','Discography']),
+projects:()=>section('Projects','Keep releases, albums, EPs and campaigns organized.',['Albums & EPs','Releasing Plans','Content & Media','Ads Management','Brand Assets']),
+tasks:()=>section('Team & Tasks','Assignments, deadlines and team activity.',['My Tasks','Team Dashboard','Projects Dashboard','Comments & Notes','Activity Log']),
+more:()=>section('Workspace','Your professional artist toolkit.',['Analytics','Platforms','Release Calendar','Artist Finance','Live Shows & Bookings','Artist Profile','Goals & Milestones','Notifications','Settings'])
+};
+function section(title,desc,items){return `<div class="eyebrow">TM workspace</div><h1 class="heading">${title}</h1><p class="sub">${desc}</p><div class="section-head"><h2>Sections</h2></div><div class="card">${items.map((x,i)=>`<div class="item"><div class="item-icon">${['♫','▦','◉','↗','✳'][i%5]}</div><div style="flex:1"><div class="item-title">${x}</div><div class="item-sub">Open ${x.toLowerCase()} workspace</div></div><span class="pill">SOON</span></div>`).join('')}</div><p class="sub" style="margin-top:16px">This is the first app shell. Features will be connected in the next build stages.</p>`}
+function render(page='dashboard'){view.innerHTML=(pages[page]||pages.dashboard)();nav.forEach(n=>n.classList.toggle('active',n.dataset.page===page));}
+document.addEventListener('click',e=>{const tab=e.target.closest('[data-page]');if(tab){render(tab.dataset.page);return}const go=e.target.closest('[data-go]');if(go){render(go.dataset.go);return}const add=e.target.closest('[data-add]');if(add){const type=add.dataset.add;view.innerHTML=`<div class="eyebrow">Quick create</div><h1 class="heading">New ${type}</h1><p class="sub">Capture the basics. Detailed fields will be added in the relevant module.</p><form id="createForm"><label>${type} name</label><input id="entryName" required placeholder="Enter ${type.toLowerCase()} name"><label>Notes</label><textarea id="entryNotes" rows="3" placeholder="Optional notes"></textarea><button class="action" type="submit">Save ${type}</button> <button class="secondary" type="button" id="cancel">Cancel</button></form><div id="saved"></div>`;document.getElementById('cancel').onclick=()=>render('dashboard');document.getElementById('createForm').onsubmit=ev=>{ev.preventDefault();const entry={type,name:document.getElementById('entryName').value,notes:document.getElementById('entryNotes').value,createdAt:new Date().toISOString()};const list=JSON.parse(localStorage.getItem('tm_drafts')||'[]');list.push(entry);localStorage.setItem('tm_drafts',JSON.stringify(list));document.getElementById('saved').innerHTML='<p class="metric-note">Saved on this device as a local draft.</p>';};}});
+if('serviceWorker' in navigator && location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+render();
